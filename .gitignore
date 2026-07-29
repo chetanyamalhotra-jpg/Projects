@@ -8,3 +8,13 @@
 /house.py
 /mario.py
 /parity.py
+average.py
+generate.py
+itunes.py
+name.py
+say.py
+sayings.py
+test_calculator.py
+__pycache__/calculator.cpython-314.pyc
+__pycache__/test_calculator.cpython-314-pytest-9.1.1.pyc
+.gitignore
