@@ -8,7 +8,7 @@ decisions or to store real patient information.
 
 | Project | Purpose | Run |
 | --- | --- | --- |
-| [Drug Dose Calculator](Drug-Dose-Calculator/README.md) | Demonstrates validation and bounded arithmetic with fictional educational examples. | `python Drug-Dose-Calculator/maindrug.py` |
+| [Drug Dose Calculator](Drug-Dose-Calculator/Readme.md) | Demonstrates validation and bounded arithmetic with fictional educational examples. | `python Drug-Dose-Calculator/maindrug.py` |
 | [Patient Record Manager](Patient-Record-Manager/README.md) | Demonstrates a local SQLite CRUD CLI with validation. | `python Patient-Record-Manager/main.py` |
 | [Smart BMI Calculator](smart-BMI-Calculator/Readme.md) | Demonstrates input validation and BMI category logic. | `python smart-BMI-Calculator/main.py` |
 
