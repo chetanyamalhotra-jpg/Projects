@@ -1,0 +1,15 @@
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = [
+  "Drug-Dose-Calculator",
+  "Patient-Record-Manager",
+  "smart-BMI-Calculator",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+

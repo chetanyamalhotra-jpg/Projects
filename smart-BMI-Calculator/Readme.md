@@ -1,35 +1,31 @@
-# Smart BMI Calculator
+# Educational Smart BMI Calculator
 
-# Description
-A Python application that calculates a user's Body Mass Index (BMI), classifies the result into standard BMI categories, and displays a personalized message.
+A small Python application that demonstrates validated numeric input, a BMI
+calculation, and category boundaries. It is informational only and is not
+medical advice.
 
-# Features
-- User input
-- BMI calculation
-- BMI classification
+## Features
 
-# Screenshots
+- Rejects non-numeric, non-finite, zero, and negative height/weight values
+- Keeps calculation and classification logic import-safe and testable
+- Uses explicit category boundaries, including 18.5 as `Healthy weight`
 
-## Source Code
-![Source Code](smart-BMI-Calculator/screenshots/code.png)
+## Run
 
-## Source Output
-![Program Output](smart-BMI-Calculator/screenshots/output.png)
+```bash
+python main.py
+```
 
-# How to Run
-1.Clone the Repository
-2.Open "main.py".
-3.Run the Program using python
+## Test
 
-# Technologies Used
-- Python
+From the repository root:
 
-# Future Improvements
-- Input validation
-- GUI
-- Save patient records
-- AI health recommendations
-- Personalized Messages
+```bash
+python -m pytest smart-BMI-Calculator
+```
 
-# Author
-**Chetanya**
+## Screenshots
+
+![Source code](screenshots/code.png)
+![Program output](screenshots/output.png)
+
