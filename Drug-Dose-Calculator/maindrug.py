@@ -1,177 +1,149 @@
-"""
-Drug Dose Calculator v1.0
---------------------------
-Educational project — NOT for real clinical use.
-Calculates approximate weight-based doses for Paracetamol, Amoxicillin, and ORS.
+"""Educational drug-dose arithmetic demonstration.
 
-Formulas used (simplified, for learning purposes):
-- Paracetamol: 15 mg/kg per dose, max single dose 1000 mg, max 4000 mg/day
-- Amoxicillin: 25 mg/kg/day divided into 3 doses, max single dose 500 mg
-- ORS: 20 ml/kg for maintenance (simplified — real practice often uses
-  Holliday-Segar method, which is a stretch goal for a future version)
+This application is not clinically validated and must never be used for real
+prescribing, administration, or treatment decisions.
 """
 
-# Constants — named instead of "magic numbers" scattered in the code,
-# so dosing values are easy to find and update in one place.
+from math import floor, isfinite
+
 PARACETAMOL_MG_PER_KG = 15
 PARACETAMOL_MAX_SINGLE_DOSE = 1000
 PARACETAMOL_MAX_DAILY_DOSE = 4000
-
 AMOXICILLIN_MG_PER_KG_PER_DAY = 25
 AMOXICILLIN_DOSES_PER_DAY = 3
 AMOXICILLIN_MAX_SINGLE_DOSE = 500
-
 ORS_ML_PER_KG = 20
 
 
-def calculate_dose(drug_name, weight_kg, age_years):
+def _require_positive_finite(value, label):
+    """Return a validated numeric value or raise ValueError."""
+    if isinstance(value, bool):
+        raise ValueError(f"{label} must be a number.")
+    try:
+        number = float(value)
+    except (TypeError, ValueError) as error:
+        raise ValueError(f"{label} must be a number.") from error
+    if not isfinite(number) or number <= 0:
+        raise ValueError(f"{label} must be a finite number greater than zero.")
+    return number
+
+
+def calculate_dose(drug_name, weight_kg):
+    """Return a bounded educational example for a supported drug.
+
+    Age is intentionally not accepted because this simplified exercise does not
+    implement age-specific rules. No administration schedule is generated.
     """
-    Calculates recommended dose for a given drug based on weight and age.
-    Returns a dict with: drug, dose, unit, frequency, notes.
-    """
-    drug_name = drug_name.lower()
+    weight_kg = _require_positive_finite(weight_kg, "Weight")
+    drug_name = str(drug_name).strip().lower()
 
     if drug_name == "paracetamol":
-        dose = weight_kg * PARACETAMOL_MG_PER_KG
-        # Cap at the max single dose — a real safety consideration,
-        # not just a coding exercise. Never silently exceed a known max.
-        if dose > PARACETAMOL_MAX_SINGLE_DOSE:
-            dose = PARACETAMOL_MAX_SINGLE_DOSE
-        unit = "mg"
-        frequency = "every 4-6 hours"
-        notes = f"Maximum {PARACETAMOL_MAX_DAILY_DOSE} mg total per day"
+        dose = min(weight_kg * PARACETAMOL_MG_PER_KG, PARACETAMOL_MAX_SINGLE_DOSE)
+        max_doses_per_day = floor(PARACETAMOL_MAX_DAILY_DOSE / dose)
+        return {
+            "drug": drug_name,
+            "dose": dose,
+            "unit": "mg",
+            "frequency": "No clinical schedule supplied",
+            "max_doses_per_day": max_doses_per_day,
+            "notes": (
+                "Educational example only. This program does not determine an "
+                "administration schedule. Its example daily cap is "
+                f"{PARACETAMOL_MAX_DAILY_DOSE} mg."
+            ),
+        }
 
-    elif drug_name == "amoxicillin":
-        daily_dose = weight_kg * AMOXICILLIN_MG_PER_KG_PER_DAY
-        dose = daily_dose / AMOXICILLIN_DOSES_PER_DAY
-        if dose > AMOXICILLIN_MAX_SINGLE_DOSE:
-            dose = AMOXICILLIN_MAX_SINGLE_DOSE
-        unit = "mg"
-        frequency = f"{AMOXICILLIN_DOSES_PER_DAY} times per day"
-        notes = f"Maximum single dose {AMOXICILLIN_MAX_SINGLE_DOSE} mg"
+    if drug_name == "amoxicillin":
+        dose = min(
+            weight_kg * AMOXICILLIN_MG_PER_KG_PER_DAY / AMOXICILLIN_DOSES_PER_DAY,
+            AMOXICILLIN_MAX_SINGLE_DOSE,
+        )
+        return {
+            "drug": drug_name,
+            "dose": dose,
+            "unit": "mg",
+            "frequency": "No clinical schedule supplied",
+            "max_doses_per_day": None,
+            "notes": "Educational example only; no clinical schedule is modeled.",
+        }
 
-    elif drug_name == "ors":
-        dose = weight_kg * ORS_ML_PER_KG
-        unit = "ml"
-        frequency = "per day (maintenance)"
-        notes = "Simplified formula — real practice may use Holliday-Segar method"
+    if drug_name == "ors":
+        return {
+            "drug": drug_name,
+            "dose": weight_kg * ORS_ML_PER_KG,
+            "unit": "ml",
+            "frequency": "No clinical schedule supplied",
+            "max_doses_per_day": None,
+            "notes": "Educational example only; no clinical schedule is modeled.",
+        }
 
-    else:
-        # Should not normally be reached since main() validates drug choice
-        # before calling this function, but kept as a safe fallback.
-        dose = None
-        unit = None
-        frequency = None
-        notes = "Drug not found"
-
-    return {
-        "drug": drug_name,
-        "dose": dose,
-        "unit": unit,
-        "frequency": frequency,
-        "notes": notes,
-    }
+    raise ValueError("Unsupported drug.")
 
 
-def get_valid_float(prompt, min_value=None, allow_zero=False):
-    """
-    Repeatedly asks the user for a number until a valid one is entered.
-    Handles: non-numeric input, negative numbers, and zero (if not allowed).
-    Keeping this as its own function avoids repeating the same
-    validation loop for both age and weight.
-    """
+def get_valid_float(prompt, min_value=None):
+    """Prompt until a finite positive number satisfying an optional minimum."""
     while True:
         raw_value = input(prompt).strip()
-
-        if raw_value == "":
-            print("Input cannot be empty. Please try again.")
-            continue
-
         try:
-            value = float(raw_value)
-        except ValueError:
-            print("That doesn't look like a number. Please try again.")
+            value = _require_positive_finite(raw_value, "Input")
+        except ValueError as error:
+            print(error)
             continue
-
-        if value < 0:
-            print("Value cannot be negative. Please try again.")
-            continue
-
-        if value == 0 and not allow_zero:
-            print("Value cannot be zero. Please try again.")
-            continue
-
         if min_value is not None and value < min_value:
-            print(f"Value seems unrealistic (too low). Please try again.")
+            print("Value seems unrealistic (too low). Please try again.")
             continue
-
         return value
 
 
 def get_drug_choice():
-    """
-    Asks the user to select a drug from the menu, re-prompting on
-    invalid input instead of crashing or silently failing.
-    """
-    drug_choices = {"1": "paracetamol", "2": "amoxicillin", "3": "ors"}
-
+    """Prompt until a supported menu choice is selected."""
+    choices = {"1": "paracetamol", "2": "amoxicillin", "3": "ors"}
     while True:
-        print("\nSelect a drug:")
+        print("\nSelect an educational example:")
         print("1. Paracetamol")
         print("2. Amoxicillin")
         print("3. ORS")
-        drug_choice = input("Enter choice (1-3): ").strip()
-
-        if drug_choice in drug_choices:
-            return drug_choices[drug_choice]
-
+        choice = input("Enter choice (1-3): ").strip()
+        if choice in choices:
+            return choices[choice]
         print("Invalid choice. Please enter 1, 2, or 3.")
 
 
+def format_amount(amount):
+    """Format an amount without unnecessary decimal places."""
+    return str(int(amount)) if amount.is_integer() else f"{amount:.1f}"
+
+
 def main():
-    print("Welcome to Drug Dose Calculator")
-    print("DISCLAIMER: This tool is for educational purposes only.")
-    print("It is NOT a substitute for professional medical advice,")
-    print("diagnosis, or treatment. Always consult a qualified")
-    print("healthcare provider before administering any medication.")
+    print("Welcome to the Educational Drug Dose Calculator")
+    print("This program is NOT for clinical use or real treatment decisions.")
 
     while True:
-        patient_name = input("\nEnter patient name (or 'q' to quit): ").strip()
+        patient_name = input(
+            "\nEnter a fictional patient name (or 'q' to quit): "
+        ).strip()
         if patient_name.lower() == "q":
-            print("Thank you for using Drug Dose Calculator. Goodbye!")
-            break
-
-        if patient_name == "":
-            print("Patient name cannot be empty. Please try again.")
+            print("Goodbye!")
+            return
+        if not patient_name:
+            print("Patient name cannot be empty.")
             continue
 
-        # Age can reasonably be very young (e.g. 0.1 for a newborn in months-as-years),
-        # so we don't block small positive values, only zero/negative.
-        age = get_valid_float("Enter patient age (years): ")
-
-        # Weight has a sane minimum for a real patient — 1 kg guards against
-        # obvious typos while still allowing low infant weights.
+        age = get_valid_float("Enter patient age (years, display only): ")
         weight = get_valid_float("Enter patient weight (kg): ", min_value=1)
+        result = calculate_dose(get_drug_choice(), weight)
 
-        drug_name = get_drug_choice()
-        result = calculate_dose(drug_name, weight, age)
-
-        # Format dose nicely — avoid "270.0 mg" when "270 mg" reads better.
-        dose_display = (
-            int(result["dose"]) if result["dose"] == int(result["dose"])
-            else round(result["dose"], 1)
-        )
-
-        print("PATIENT SUMMARY")
-        print(f"Name:      {patient_name}")
-        print(f"Age:       {age} years")
-        print(f"Weight:    {weight} kg")
-        print(f"Drug:      {result['drug'].capitalize()}")
-        print(f"Dose:      {dose_display} {result['unit']}")
-        print(f"Frequency: {result['frequency']}")
-        print(f"Notes:     {result['notes']}")
-        
+        print("\nEDUCATIONAL EXAMPLE")
+        print(f"Name: {patient_name}")
+        print(f"Age: {format_amount(age)} years (not used for calculation)")
+        print(f"Weight: {format_amount(weight)} kg")
+        print(f"Example amount: {format_amount(result['dose'])} {result['unit']}")
+        print(f"Schedule: {result['frequency']}")
+        if result["max_doses_per_day"] is not None:
+            print(f"Example maximum count in 24 hours: {result['max_doses_per_day']}")
+        print(f"Notes: {result['notes']}")
 
 
 if __name__ == "__main__":
     main()
+

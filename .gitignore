@@ -1,20 +1,24 @@
-/calculator.py
-/cat.py
-/compare.py
-/exceptions-number.py
-/grade.py
-/hello.py
-/hogwarts.py
-/house.py
-/mario.py
-/parity.py
-average.py
-generate.py
-itunes.py
-name.py
-say.py
-sayings.py
-test_calculator.py
-__pycache__/calculator.cpython-314.pyc
-__pycache__/test_calculator.cpython-314-pytest-9.1.1.pyc
-.gitignore
+# Python bytecode and test caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+venv/
+.venv/
+
+# Local patient data -- never commit real patient information
+*.db
+*.sqlite
+*.sqlite3
+patients.db
+test_patients.db
+
+# OS/editor files
+.DS_Store
+.vscode/
+
